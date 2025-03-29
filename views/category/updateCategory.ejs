@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Category</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            background-color: #f0f0f0;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #f8f9fa;
+            padding-top: 3rem;
+            overflow-y: auto;
+            z-index: 1;
+        }
+
+        .sidebar-nav-link {
+            padding: 10px;
+            color: #000;
+            text-decoration: none;
+            display: block;
+            font-family: 'VT323', monospace;
+        }
+
+        .sidebar-nav-link:hover {
+            background-color: #e9ecef;
+        }
+
+        .sidebar-brand {
+            padding: 20px;
+            font-weight: bold;
+            color: #000;
+            text-decoration: none;
+            font-family: 'VT323', monospace;
+        }
+
+        /* Container styles */
+        .container {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'VT323', monospace;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 30px;
+        }
+
+        /* Form styles */
+        label {
+            font-size: 20px;
+            font-weight: bold;
+            font-family: 'VT323', monospace;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #000;
+            background-color: #f2f2f2;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            color: #fff;
+            background-color: #000;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0 #888;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 2px 2px 0 #888;
+            transform: translate(2px, 2px);
+        }
+
+        .btn-primary:active {
+            box-shadow: none;
+            transform: translate(4px, 4px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-nav-link active">
+            <div style="width: 100px; height: 100px; overflow: hidden; border-radius: 50%; margin-bottom: 10px;">
+                <img src="<%= user.avatar %>" alt="User Avatar" style="width: 100%; height: auto;">
+            </div>
+            <p style="margin-bottom: 1em;"><%= user.email %></p>
+        </div>
+
+        <a href="http://localhost:6002/question" class="sidebar-nav-link active">Quản lý câu hỏi</a>
+        <a href="http://localhost:6002/category" class="sidebar-nav-link">Danh sách thể loại </a>
+        <a href="http://localhost:6002/test" class="sidebar-nav-link">Quản lý quizz </a>
+    </div>
+    <div class="container mt-5">
+        <h1>Update Category</h1>
+
+        <form id="updateCategoryForm" action="/category/update/<%= category._id %>" method="POST">
+            <input type="hidden" name="_method" value="PUT">
+            <div class="mb-3">
+                <label for="name" class="form-label">Tên danh mục</label>
+                <input type="text" class="form-control" id="name" name="name" value="<%= category.name %>" required>
+            </div>
+            <button type="submit" class="btn-primary">Cập nhật</button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('updateCategoryForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            updateCategory();
+        });
+
+        function updateCategory() {
+            const form = document.getElementById('updateCategoryForm');
+            const formData = {
+                name: form.querySelector('[name="name"]').value
+            };
+
+            fetch(form.action, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    console.log("New category name:", formData.name);
+                    window.location.href = '/category';
+                })
+                .catch(error => {
+                    console.error('Error updating category:', error);
+                });
+        }
+    </script>
+
+</body>
+</html>

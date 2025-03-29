@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #f8f9fa;
+            padding-top: 3rem;
+            overflow-y: auto;
+            z-index: 1;
+        }
+
+        .sidebar-nav-link {
+            padding: 10px;
+            color: #000;
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-nav-link:hover {
+            background-color: #e9ecef;
+        }
+
+        .sidebar-brand {
+            padding: 20px;
+            font-weight: bold;
+            color: #000;
+            text-decoration: none;
+        }
+
+        /* Centering form horizontally */
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Additional styles for Bootstrap */
+        .form-control {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            margin-right: 5px;
+        }
+
+        /* Pixel button styles */
+        .pixel-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            font-family: 'VT323', monospace;
+            font-size: 12px;
+            color: #fff;
+            background-color: #000;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0 #888;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .pixel-btn:hover {
+            box-shadow: 2px 2px 0 #888;
+            transform: translate(2px, 2px);
+        }
+
+        .pixel-btn:active {
+            box-shadow: none;
+            transform: translate(4px, 4px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-nav-link active">
+            <div style="width: 100px; height: 100px; overflow: hidden; border-radius: 50%; margin-bottom: 10px;">
+                <img src="<%= user.avatar %>" alt="User Avatar" style="width: 100%; height: auto;">
+            </div>
+            <p style="margin-bottom: 1em;">
+                <%= user.email %>
+            </p>
+        </div>
+
+        <a href="http://localhost:6002/question" class="sidebar-nav-link active">Quản lý câu hỏi</a>
+        <a href="http://localhost:6002/category" class="sidebar-nav-link">Danh sách thể loại </a>
+        <a href="http://localhost:6002/test" class="sidebar-nav-link">Quản lý quizz </a>
+    </div>
+    <div class="container mt-5">
+        <h1 class="mt-5" style="margin-left: 500px; margin-top: 20px;">Update Test</h1>
+        <form id="updateTestForm" class="mt-3">
+            <div class="form-group">
+                <label for="name">Test Name:</label>
+                <input type="text" id="name" name="name" class="form-control" value="<%= test.name %>" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Test Image:</label>
+                <input type="text" id="image" name="image" class="form-control" value="<%= test.image %>" required> 
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="categorySelect" name="category" class="form-control" onchange="getQuestionsBySelectedCategory()" required>
+                    <% categories.forEach(category=> { %>
+                        <option value="<%= category._id %>" <%= test.category.toString() === category._id.toString() ? 'selected' : '' %>>
+                            <%= category.name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            <div id="questionList" class="form-group"></div>
+            <label for="questions">Questions:</label>
+            <% questions.forEach(question=> { %>
+                <div class="form-check">
+                    <input type="checkbox" id="<%= question._id %>" name="questions" value="<%= question._id %>" <% if (test.questions.map(q => q.toString()).includes(question._id.toString())) { %> checked <% } %>> 
+                    <label for="<%= question._id %>" class="form-check-label">
+                        <%= question.content %>
+                    </label>
+                </div>
+            <% }); %>
+            <!-- End loop -->
+            <button type="submit" class="btn btn-success pixel-btn">Update</button>
+        </form>
+    </div>
+
+    <script>
+        async function getQuestionsBySelectedCategory() {
+            const categoryId = document.getElementById('categorySelect').value;
+            const response = await fetch(`/question/category/${categoryId}/json`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            data.forEach(question => {
+                const checkbox = document.getElementById(question._id);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        document.getElementById("updateTestForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            updateTest();
+        });
+
+        async function updateTest() {
+            const testName = document.getElementById('name').value;
+            const testImage = document.getElementById('image').value;
+            const category = document.getElementById('categorySelect').value;
+            const selectedQuestions = [];
+            document.querySelectorAll('input[name="questions"]:checked').forEach(question => {
+                selectedQuestions.push(question.value);
+            });
+
+            fetch('/test/update/<%= test._id %>', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: testName,
+                        image: testImage,
+                        category: category,
+                        questions: selectedQuestions,
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    window.location.href = '/test';
+                })
+                .catch(error => {
+                    console.error('Error updating test:', error);
+                });
+        }
+    </script>
+</body>
+
+</html>
