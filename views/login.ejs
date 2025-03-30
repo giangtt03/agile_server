@@ -48,23 +48,6 @@
         label {
             font-size: 14px;
         }
-
-        .snowflake {
-            position: absolute;
-            top: -10px;
-            background-color: #fff;
-            border-radius: 50%;
-            width: 10px;
-            height: 10px;
-            opacity: 0.8;
-            animation: fall linear infinite;
-        }
-
-        @keyframes fall { /*roi theo truc y*/
-            to {
-                transform: translateY(100vh);
-            }
-        }
     </style>
 </head>
 <body>
@@ -73,14 +56,19 @@
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-title text-center">Login</h1>
-                    <form action="/login" method="POST">
+                    <% if (error) { %>
+                        <div class="alert alert-danger"><%= error %></div>
+                    <% } %>
+                    <form action="/login" method="POST" onsubmit="return validateForm()">
                         <div class="form-group">
                             <label for="email">Email:</label>
                             <input type="email" class="form-control" id="email" name="email" required>
+                            <small id="emailError" class="text-danger"></small>
                         </div>
                         <div class="form-group">
                             <label for="password">Password:</label>
                             <input type="password" class="form-control" id="password" name="password" required>
+                            <small id="passwordError" class="text-danger"></small>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Login</button>
                     </form>
@@ -90,21 +78,24 @@
     </div>
 
     <script>
-        // ham tao
-        function createSnowflake() {
-            const snowflake = document.createElement('div');
-            snowflake.classList.add('snowflake');
-            snowflake.style.left = `${Math.random() * 100}vw`;
-            snowflake.style.animationDuration = `${Math.random() * 3 + 2}s`;
-            document.body.appendChild(snowflake);
+        function validateForm() {
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            let isValid = true;
 
-            // xoa
-            snowflake.addEventListener('animationend', () => {
-                snowflake.remove();
-            });
+            document.getElementById("emailError").innerText = "";
+            document.getElementById("passwordError").innerText = "";
+
+            if (!email) {
+                document.getElementById("emailError").innerText = "Email không được để trống";
+                isValid = false;
+            }
+            if (!password) {
+                document.getElementById("passwordError").innerText = "Mật khẩu không được để trống";
+                isValid = false;
+            }
+            return isValid;
         }
-
-        setInterval(createSnowflake, 200);
     </script>
 </body>
 </html>

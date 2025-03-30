@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
@@ -59,5 +59,12 @@ app.use('/', authRouter);
 app.use('/category', categoryRouter);
 app.use('/question', questionRouter);
 app.use('/test', testRouter);
+
+//api
+const apiAuthRouter = require('./routes/api/api.auth');
+const apiTestRouter = require('./routes/api/api.testt');
+
+app.use('/api', apiAuthRouter);
+app.use('/api/quizz', apiTestRouter);
 
 app.listen(process.env.PORT || port, () => console.log(`Server listening on port ${process.env.PORT}!`));

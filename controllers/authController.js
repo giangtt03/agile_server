@@ -28,7 +28,7 @@ module.exports = {
   loginUser: async (req, res) => {
     try {
         if (req.method === "GET") {
-            return res.render('login');
+            return res.render('login', { error: null }); 
         }
 
         const { email, password } = req.body;
@@ -36,30 +36,27 @@ module.exports = {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ error: 'User not found' });
+            return res.render('login', { error: 'User not found' }); 
         }
 
-        // Kiểm tra mật khẩu
+        // Giải mã mật khẩu
         const bytes = CryptoJs.AES.decrypt(user.password, process.env.SECRET);
         const originalPassword = bytes.toString(CryptoJs.enc.Utf8);
 
         if (originalPassword !== password) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.render('login', { error: 'Invalid credentials' }); 
         }
 
         const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SEC, { expiresIn: '1h' });
 
-        // Lưu thông tin người dùng và token vào session
         req.session.user = user;
         req.session.token = token;
 
-        console.log("Data user: ", user)
-
-        res.render('menu', { user: user});
+        res.render('menu', { user: user });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.render('login', { error: 'Internal Server Error' }); 
     }
 }
 

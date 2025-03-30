@@ -1,0 +1,13 @@
+import mongoose from "mongoose";
+
+const CommentSchema = new mongoose.Schema(
+    {
+        content: { type: String, required: true }, 
+        author: { type: mongoose.Schema.Types.ObjectId, ref: "TKNguoiDung", required: true }, 
+        topic: { type: mongoose.Schema.Types.ObjectId, ref: "Topic", required: true },
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "TKNguoiDung" }],
+    },
+    { timestamps: true }
+);
+
+export default mongoose.model("Comment", CommentSchema);
