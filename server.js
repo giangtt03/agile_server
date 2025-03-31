@@ -63,8 +63,12 @@ app.use('/test', testRouter);
 //api
 const apiAuthRouter = require('./routes/api/api.auth');
 const apiTestRouter = require('./routes/api/api.testt');
+const apiTopicRouter = require('./routes/api/api.topic');
+const apicommentRouter = require('./routes/api/api.comment');
 
 app.use('/api', apiAuthRouter);
 app.use('/api/quizz', apiTestRouter);
+app.use('/api/t', apiTopicRouter);
+app.use('/api/c', apicommentRouter);
 
 app.listen(process.env.PORT || port, () => console.log(`Server listening on port ${process.env.PORT}!`));

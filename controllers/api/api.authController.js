@@ -63,7 +63,7 @@ module.exports = {
                 return res.status(401).json({ error: 'Invalid credentials' });
             }
 
-            const token = jwt.sign({ userId: user._id }, process.env.JWT_SEC, { expiresIn: '1h' });
+            const token = jwt.sign({ userId: user._id }, process.env.JWT_SEC, { expiresIn: '1d' });
 
             res.json({ user: user, token: token });
 

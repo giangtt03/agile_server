@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-
+const mongoose = require('mongoose');
 const TopicSchema = new mongoose.Schema(
     {
         title: { type: String, required: true },
@@ -12,4 +11,4 @@ const TopicSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-export default mongoose.model("Topic", TopicSchema);
+module.exports = mongoose.model("Topic", TopicSchema);
