@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/categoryController');
-const verifyToken = require('../middleware/authMiddleware'); 
+const verifyToken = require('../middleware/sessionMiddleware'); 
 
 router.get('/update/:id', verifyToken, categoryController.getUpdateCategoryForm);
 router.put('/update/:id', verifyToken, categoryController.updateCategory);

@@ -27,37 +27,36 @@ module.exports = {
 
   loginUser: async (req, res) => {
     try {
-        if (req.method === "GET") {
-            return res.render('login', { error: null }); 
-        }
+      if (req.method === "GET") {
+        return res.render('login', { error: null });
+      }
 
-        const { email, password } = req.body;
+      const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+      const user = await User.findOne({ email });
 
-        if (!user) {
-            return res.render('login', { error: 'User not found' }); 
-        }
+      if (!user) {
+        return res.render('login', { error: 'User not found' });
+      }
 
-        // Giải mã mật khẩu
-        const bytes = CryptoJs.AES.decrypt(user.password, process.env.SECRET);
-        const originalPassword = bytes.toString(CryptoJs.enc.Utf8);
+      // Giải mã mật khẩu
+      const bytes = CryptoJs.AES.decrypt(user.password, process.env.SECRET);
+      const originalPassword = bytes.toString(CryptoJs.enc.Utf8);
 
-        if (originalPassword !== password) {
-            return res.render('login', { error: 'Invalid credentials' }); 
-        }
+      if (originalPassword !== password) {
+        return res.render('login', { error: 'Invalid credentials' });
+      }
 
-        const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SEC, { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SEC, { expiresIn: '1h' });
 
-        req.session.user = user;
-        req.session.token = token;
+      req.session.user = user;
+      req.session.token = token;
 
-        res.render('menu', { user: user });
+      res.render('menu', { user: user });
 
     } catch (error) {
-        console.error(error);
-        res.render('login', { error: 'Internal Server Error' }); 
+      console.error(error);
+      res.render('login', { error: 'Internal Server Error' });
     }
-}
-
+  }
 };

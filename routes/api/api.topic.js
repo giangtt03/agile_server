@@ -13,4 +13,7 @@ router.delete('/:id', authMiddleware, topicController.deleteTopic);
 
 router.get('/tag/:tag', authMiddleware, topicController.getTopicsByTag);
 
+router.post('/search', authMiddleware, topicController.searchTopics);
+
+
 module.exports = router;

@@ -106,39 +106,41 @@
         <a href="http://localhost:6002/question" class="sidebar-nav-link active">Quản lý câu hỏi</a>
         <a href="http://localhost:6002/category" class="sidebar-nav-link">Danh sách thể loại </a>
         <a href="http://localhost:6002/test" class="sidebar-nav-link">Quản lý quizz </a>
+        <a href="/logout" class="sidebar-nav-link">Đăng xuất</a>
+
     </div>
     <div class="container mt-5">
         <h1 class="mt-5" style="margin-left: 500px; margin-top: 20px;">Create Question</h1>
-    <form id="createQuestionForm" class="mt-3">
-        <div class="form-group">
-            <label for="content">Content:</label>
-            <textarea id="content" name="content" class="form-control" rows="3" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="category">Category:</label>
-            <select id="category" name="category" class="form-control" required>
-                <% categories.forEach(category=> { %>
-                    <option value="<%= category._id %>">
-                        <%= category.name %>
-                    </option>
+        <form id="createQuestionForm" class="mt-3" onsubmit="createQuestion(event)">
+            <div class="form-group">
+                <label for="content">Content:</label>
+                <textarea id="content" name="content" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" class="form-control" required>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category._id %>">
+                            <%= category.name %>
+                        </option>
                     <% }); %>
-            </select>
-        </div>
-        <div id="answers" class="form-group">
-            <div class="answer">
-                <label for="answer1">Answer 1:</label>
-                <textarea id="answer1" name="answer1" class="form-control" rows="3" placeholder="Answer 1:"
-                    required></textarea>
-                <label for="correct1">Correct:</label>
-                <select id="correct1" name="correct1" class="form-control" required>
-                    <option value="true">True</option>
-                    <option value="false">False</option>
                 </select>
             </div>
-        </div>
-        <button type="button" onclick="addAnswer()" class="btn pixel-btn">Add Answer</button>
-        <button type="button" onclick="createQuestion()" class="btn btn-success pixel-btn">Create</button>
-    </form>
+            <div id="answers" class="form-group">
+                <div class="answer">
+                    <label for="answer1">Answer 1:</label>
+                    <textarea id="answer1" name="answer1" class="form-control" rows="3" placeholder="Answer 1:" required></textarea>
+                    <label for="correct1">Correct:</label>
+                    <select id="correct1" name="correct1" class="form-control" required>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" onclick="addAnswer()" class="btn pixel-btn">Add Answer</button>
+            <button type="submit" class="btn btn-success pixel-btn">Create</button>
+        </form>
+        
     </div>
     <script>
         let answerCount = 1;
@@ -159,7 +161,8 @@
             document.getElementById('answers').appendChild(answerDiv);
         }
 
-        function createQuestion() {
+        function createQuestion(event) {
+            event.preventDefault(); 
             const content = document.getElementById('content').value;
             const category = document.getElementById('category').value;
             const answers = [];

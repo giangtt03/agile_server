@@ -9,6 +9,8 @@ router.get('/test/:testId', testController.getTestById);
 
 router.get('/sessions/user/:userId', testController.getSessionsByUserId);
 
+router.post('/search', testController.searchTests);
+
 // router.get('/mostTakenTests', testController.getMostTakenTests);
 
 module.exports = router;

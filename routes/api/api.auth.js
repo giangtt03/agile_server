@@ -1,8 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const api = require('../../controllers/api/api.authController');
+const multer = require('multer');
 
-router.post('/create-user', api.createTK);
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+
+router.get('/user/:id', api.getUserById);
+
+router.post('/create-user', upload.single('avatar'), api.createTK);
+
+router.put('/update/:id', upload.single('avatar'), api.updateProfile);
 
 router.post('/login', api.loginTK);
 

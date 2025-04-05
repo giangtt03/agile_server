@@ -1,13 +1,24 @@
 const mongoose = require('mongoose');
 
+const removeAccents = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") 
+    .replace(/đ/g, "d") 
+    .replace(/Đ/g, "D");
+};
+
 const TestSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
   },
-  image:{
+  normalizedName: {
+    type: String, // Lưu tên không dấu để tìm kiếm
+  },
+  image: {
     type: String,
-    require: true,
+    required: true,
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,7 +29,12 @@ const TestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Question', 
   }],
-  // duration: { type: Number, required: true } // Thời gian làm bài 
+});
+
+// Middleware tự động lưu tên không dấu khi tạo mới hoặc cập nhật bài quiz
+TestSchema.pre("save", function (next) {
+  this.normalizedName = removeAccents(this.name).toLowerCase();
+  next();
 });
 
 module.exports = mongoose.model('Test', TestSchema);

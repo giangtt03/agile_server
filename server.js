@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 // const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
+const favicon = require('express-favicon');
 const methodOverride = require('method-override');
 
 const app = express();
@@ -27,6 +28,9 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+
+app.use(favicon(__dirname + '/public/fac.ico'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -2,6 +2,11 @@ const Test = require('../../models/test');
 const User = require('../../models/api/User');
 const Session = require('../../models/api/session');
 
+// ham xoa dau
+const removeAccents = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
 module.exports = {
     getTests: async (req, res) => {
         try {
@@ -113,5 +118,31 @@ module.exports = {
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
+    },
+    searchTests: async (req, res) => {
+        try {
+            const { name } = req.query;
+            if (!name) {
+                return res.status(400).json({ message: "Missing search query" });
+            }
+    
+            const normalizedQuery = removeAccents(name).toLowerCase();
+    
+            // Tìm từ hoàn chỉnh bằng \b (word boundary)
+            const regexQuery = name.split(" ").map(word => `\\b${word}\\b`).join("|");
+            const regexNormalizedQuery = normalizedQuery.split(" ").map(word => `\\b${word}\\b`).join("|");
+    
+            const tests = await Test.find({
+                $or: [
+                    { name: { $regex: new RegExp(regexQuery, "i") } },
+                    { normalizedName: { $regex: new RegExp(regexNormalizedQuery, "i") } }
+                ]
+            });
+    
+            res.json(tests);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     }
+    
 };

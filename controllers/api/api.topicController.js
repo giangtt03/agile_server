@@ -1,6 +1,10 @@
 const Topic = require("../../models/api/topic");
 const User = require("../../models/api/User");
 
+const removeAccents = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
 module.exports = {
     createTopic: async (req, res) => {
         try {
@@ -49,18 +53,26 @@ module.exports = {
 
     deleteTopic: async (req, res) => {
         try {
+            console.log("User from req:", req.user); 
             const topic = await Topic.findById(req.params.id);
             if (!topic) return res.status(404).json({ error: "Topic not found" });
-            if (topic.author.toString() !== req.user.userId) return res.status(403).json({ error: "Unauthorized" });
+    
+            console.log("Topic author:", topic.author.toString());
+            console.log("Request user ID:", req.user._id);
+    
+            if (topic.author.toString() !== req.user._id.toString()) { 
+                return res.status(403).json({ error: "Unauthorized" });
+            }
             
-            await topic.remove();
-            await User.findByIdAndUpdate(req.user.userId, { $pull: { topics: topic._id } });
+            await topic.deleteOne();
+            await User.findByIdAndUpdate(req.user._id, { $pull: { topics: topic._id } });
             res.json({ message: "Topic deleted" });
         } catch (error) {
             console.error("Error in deleteTopic:", error);
             res.status(500).json({ error: error.message });
         }
     },
+    
     getTopicsByTag: async (req, res) => {
         try {
             const { tag } = req.params; // Lấy tag từ tham số URL
@@ -75,6 +87,33 @@ module.exports = {
             res.json(topics);
         } catch (error) {
             console.error("Error in getTopicsByTag:", error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    searchTopics: async (req, res) => {
+        try {
+            const { title } = req.query;
+            if (!title) {
+                return res.status(400).json({ message: "Missing search query" });
+            }
+
+            const normalizedQuery = removeAccents(title).toLowerCase();
+
+            // Chỉ tìm từ hoàn chỉnh bằng \b (word boundary)
+            const regexQuery = title.split(" ").map(word => `\\b${word}\\b`).join("|");
+            const regexNormalizedQuery = normalizedQuery.split(" ").map(word => `\\b${word}\\b`).join("|");
+
+            const topics = await Topic.find({
+                $or: [
+                    { title: { $regex: new RegExp(regexQuery, "i") } },
+                    { title: { $regex: new RegExp(regexNormalizedQuery, "i") } }
+                ]
+            });
+
+            res.json(topics);
+        } catch (error) {
+            console.error("Error in searchTopics:", error);
             res.status(500).json({ error: error.message });
         }
     }

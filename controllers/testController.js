@@ -8,7 +8,9 @@ module.exports = {
         try {
             const questions = await Question.find();
             const categories = await Category.find();
-            res.render('test/createTest', { questions, categories });
+            const user = req.session.user;
+
+            res.render('test/createTest', { questions, categories, user });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
@@ -54,7 +56,7 @@ module.exports = {
         try {
             // const user = req.session.user;
             const categories = await Category.find();
-            const user = req.session.user || {};
+            const user = req.session.user;
             res.render('test/createTest', { categories, user });
         } catch (error) {
             res.status(500).json({ message: error.message });
