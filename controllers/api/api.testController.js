@@ -41,32 +41,18 @@ module.exports = {
         try {
             const { testId, userId, answers } = req.body;
             const test = await Test.findById(testId).populate('questions');
-
+    
             if (!test) {
                 return res.status(404).json({ error: 'Test not found' });
             }
-
+    
             if (test.questions.length !== answers.length) {
                 return res.status(400).json({ error: 'Number of answers does not match number of questions' });
             }
-
+    
             let correctCount = 0;
             let incorrectCount = 0;
-
-            for (let index = 0; index < answers.length; index++) {
-                const userAnswer = answers[index];
-                const question = test.questions[index];
-                const correctAnswer = question.answers.find(answer => answer.answer === userAnswer && answer.correct.toLowerCase() === 'true');
-
-                if (typeof correctAnswer !== 'undefined') {
-                    correctCount++;
-                    test.questions[index].isCorrect = true;
-                } else {
-                    incorrectCount++;
-                    test.questions[index].isCorrect = false;
-                }
-            }
-
+  
             const sessionAnswers = answers.map(userAnswer => {
                 const question = test.questions.find(q => q._id.toString() === userAnswer.questionId);
                 const selectedAnswer = question.answers[userAnswer.selectedAnswerIndex];
@@ -83,7 +69,7 @@ module.exports = {
             });
             
             await test.save();
-
+    
             const session = await Session.create({
                 userId: userId,
                 testId: testId,
@@ -91,7 +77,7 @@ module.exports = {
                 correctAnswersCount: correctCount,
                 incorrectAnswersCount: incorrectCount,
             });
-
+    
             res.status(200).json({ message: 'Test completed', session });
         } catch (error) {
             res.status(500).json({ message: error.message });
