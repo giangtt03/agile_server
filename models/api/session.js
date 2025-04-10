@@ -22,10 +22,6 @@ const SessionSchema = new mongoose.Schema({
       required: true,
     },
   }],
-  score: {
-    type: Number,
-    required: true,
-  },
   correctAnswersCount: {
     type: Number,
     default: 0,

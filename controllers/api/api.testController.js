@@ -67,16 +67,21 @@ module.exports = {
                 }
             }
 
-            const sessionAnswers = answers.map((answer, index) => {
-                const question = test.questions[index];
-                const correctAnswer = question.answers.find(ans => ans.correct.toLowerCase() === 'true');
+            const sessionAnswers = answers.map(userAnswer => {
+                const question = test.questions.find(q => q._id.toString() === userAnswer.questionId);
+                const selectedAnswer = question.answers[userAnswer.selectedAnswerIndex];
+                const correct = selectedAnswer && selectedAnswer.correct.toLowerCase() === 'true';
+            
+                if (correct) correctCount++;
+                else incorrectCount++;
+            
                 return {
                     questionId: question._id,
-                    selectedAnswerIndex: index,
-                    isCorrect: correctAnswer.answer === answers[index] 
+                    selectedAnswerIndex: userAnswer.selectedAnswerIndex,
+                    isCorrect: correct
                 };
             });
-
+            
             await test.save();
 
             const session = await Session.create({
