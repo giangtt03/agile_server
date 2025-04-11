@@ -50,17 +50,29 @@ module.exports = {
 
     deleteComment: async (req, res) => {
         try {
-            const comment = await Comment.findById(req.params.id);
-            if (!comment) return res.status(404).json({ error: "Comment not found" });
-            if (comment.author.toString() !== req.user._id) return res.status(403).json({ error: "Unauthorized" });
-            
-            await comment.remove();
-            await User.findByIdAndUpdate(req.user._id, { $pull: { comments: comment._id } });
-            await Topic.findByIdAndUpdate(comment.topic, { $pull: { comments: comment._id } });
-            
-            res.json({ message: "Comment deleted" });
+            const { id } = req.params;
+            const userId = req.user._id;
+    
+            const comment = await Comment.findById(id);
+            if (!comment) {
+                return res.status(404).json({ error: "Comment not found" });
+            }
+    
+            if (comment.author.toString() !== userId.toString()) {
+                return res.status(403).json({ error: "Unauthorized" });
+            }
+    
+            await Comment.findByIdAndDelete(id);
+    
+            await Promise.all([
+                User.findByIdAndUpdate(userId, { $pull: { comments: id } }),
+                Topic.findByIdAndUpdate(comment.topic, { $pull: { comments: id } })
+            ]);
+    
+            return res.json({ message: "Comment deleted successfully" });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     }
+    
 };
