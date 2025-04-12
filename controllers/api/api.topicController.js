@@ -75,10 +75,9 @@ module.exports = {
     
     getTopicsByTag: async (req, res) => {
         try {
-            const { tag } = req.params; // Lấy tag từ tham số URL
+            const { tag } = req.params; 
 
-            // Tìm các topic có chứa tag này
-            const topics = await Topic.find({ tags: tag }).populate("author", "username").sort({ createdAt: -1 });
+            const topics = await Topic.find({ tags: tag }).populate("author", "username avatar").sort({ createdAt: -1 });
 
             if (topics.length === 0) {
                 return res.status(404).json({ error: `No topics found for tag: ${tag}` });
