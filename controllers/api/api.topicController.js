@@ -32,17 +32,17 @@ module.exports = {
 
     getTopics: async (req, res) => {
         try {
-            const topics = await Topic.find().populate("author", "username").sort({ createdAt: -1 });
+            const topics = await Topic.find().populate("author", "username avatar").sort({ createdAt: -1 });
             res.json(topics);
         } catch (error) {
             console.error("Error in getTopics:", error);
             res.status(500).json({ error: error.message });
         }
     },
-
+    
     getTopicById: async (req, res) => {
         try {
-            const topic = await Topic.findById(req.params.id).populate("author", "username");
+            const topic = await Topic.findById(req.params.id).populate("author", "username avatar");
             if (!topic) return res.status(404).json({ error: "Topic not found" });
             res.json(topic);
         } catch (error) {

@@ -8,5 +8,7 @@ const authMiddleware = require('../../middleware/authMiddleware');
 router.post('/create', authMiddleware, commentController.createComment);
 router.get('/topic/:topicId', authMiddleware, commentController.getCommentsByTopic);
 router.delete('/:id', authMiddleware, commentController.deleteComment);
+router.get("/comment-tree/:topicId", commentController.getCommentTreeByTopic);
+
 
 module.exports = router;
