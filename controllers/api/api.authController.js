@@ -1,5 +1,7 @@
 const multer = require('multer');
 const TKNguoiDung = require('../../models/api/User');
+const Topic = require("../../models/api/topic")
+const Comment = require("../../models/api/comment")
 const CryptoJs = require('crypto-js');
 const jwt = require('jsonwebtoken');
 
@@ -96,38 +98,118 @@ module.exports = {
     },
     updateProfile: async (req, res) => {
         try {
-          const { id } = req.params;
-          const { username } = req.body;
-    
-          const user = await TKNguoiDung.findById(id);
-          if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-          }
-    
-          if (username) {
-            user.username = username;
-          }
-    
-          if (req.file) {
-            const avatarBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-            user.avatar = avatarBase64;
-          }
+            const { id } = req.params;
+            const { username } = req.body;
 
-        //   console.log('req.file:', req.file); 
-        //   console.log('req.body.username:', req.body.username);
-
-          const updatedUser = await user.save();
-    
-          res.json({
-            updatedUser: {
-              ...updatedUser._doc,
-              password: undefined
+            const user = await TKNguoiDung.findById(id);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
             }
-          });
+
+            if (username) {
+                user.username = username;
+            }
+
+            if (req.file) {
+                const avatarBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+                user.avatar = avatarBase64;
+            }
+
+            //   console.log('req.file:', req.file); 
+            //   console.log('req.body.username:', req.body.username);
+
+            const updatedUser = await user.save();
+
+            res.json({
+                updatedUser: {
+                    ...updatedUser._doc,
+                    password: undefined
+                }
+            });
         } catch (error) {
-          res.status(500).json({ error: error.message });
+            res.status(500).json({ error: error.message });
         }
-      }
-    
-    
+    },
+    getUserProfile: async (req, res) => {
+        try {
+            const { userId } = req.params;
+
+            const user = await TKNguoiDung.findById(userId).select("-password");
+
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            const topicsCount = await Topic.countDocuments({ author: userId });
+            const commentsCount = await Comment.countDocuments({ author: userId });
+
+            const latestTopic = await Topic.findOne({ author: userId }).sort({ createdAt: -1 });
+            const latestComment = await Comment.findOne({ author: userId }).sort({ createdAt: -1 });
+
+            let lastActivity = user.updatedAt;
+            if (latestTopic && latestComment) {
+                lastActivity = new Date(
+                    Math.max(new Date(latestTopic.createdAt).getTime(), new Date(latestComment.createdAt).getTime())
+                );
+            } else if (latestTopic) {
+                lastActivity = latestTopic.createdAt;
+            } else if (latestComment) {
+                lastActivity = latestComment.createdAt;
+            }
+
+            res.json({
+                user,
+                stats: {
+                    topicsCount,
+                    commentsCount,
+                    lastActivity,
+                },
+            });
+        } catch (error) {
+            console.error("Error in getUserProfile:", error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    getUserTopics: async (req, res) => {
+        try {
+            const { userId } = req.params;
+
+            const user = await TKNguoiDung.findById(userId);
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            const topics = await Topic.find({ author: userId })
+                .populate("author", "username avatar")
+                .sort({ createdAt: -1 });
+
+            res.json(topics);
+        } catch (error) {
+            console.error("Error in getUserTopics:", error);
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    getUserComments: async (req, res) => {
+        try {
+            const { userId } = req.params;
+
+            const user = await TKNguoiDung.findById(userId);
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            const comments = await Comment.find({ author: userId })
+                .populate("author", "username avatar")
+                .populate("topic", "title")
+                .sort({ createdAt: -1 });
+
+            res.json(comments);
+        } catch (error) {
+            console.error("Error in getUserComments:", error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
 };

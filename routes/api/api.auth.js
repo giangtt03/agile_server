@@ -15,4 +15,10 @@ router.put('/update/:id', upload.single('avatar'), api.updateProfile);
 
 router.post('/login', api.loginTK);
 
+router.get('/profile/:userId', api.getUserProfile);
+
+router.get('/topics/:userId', api.getUserTopics);
+
+router.get('/comments/:userId', api.getUserComments);
+
 module.exports = router;
